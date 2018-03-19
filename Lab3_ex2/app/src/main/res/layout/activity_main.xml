@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/button"
-            android:text="PUSH ME HARDDDD!"/>
+            android:text="PUSH ME!"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

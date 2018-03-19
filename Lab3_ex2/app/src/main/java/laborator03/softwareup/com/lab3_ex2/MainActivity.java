@@ -16,7 +16,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import org.w3c.dom.Text;
 
 import java.io.OptionalDataException;
@@ -37,8 +40,6 @@ public class MainActivity extends AppCompatActivity {
         // define button
         final Button button = (Button) findViewById(R.id.button);
         // text views
-        final TextView textView1 = (TextView) findViewById(R.id.textView1);
-        final TextView textView2 = (TextView) findViewById(R.id.textView2);
         final TextView textView3 = (TextView) findViewById(R.id.textView3);
 
         // verify permissions
@@ -48,27 +49,6 @@ public class MainActivity extends AppCompatActivity {
 
         // define location manager
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        LocationListener locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-
-            }
-        };
         // get the last known location
         String locationProvider = LocationManager.NETWORK_PROVIDER;
         Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
@@ -84,8 +64,6 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-
                 // last known location - show them to textView3
                 String last_location = "LAST KNOWN LOCATION: " + Double.toString(finalLastLatitude) + " " + Double.toString(finalLastLongitude);
                 textView3.setText(last_location);
@@ -112,5 +90,33 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "onRequestPermissionsResult: not all permissions were granted");
             }
         }
+    }
+
+    // start and stop listening for events sent throught EventBus
+    @Override
+    protected void onResume() {
+        super.onResume();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        EventBus.getDefault().unregister(this);
+    }
+
+    // main activity listens for events (types LocationEvent)
+    // location changed
+    @Subscribe
+    public void onEvent(final LocationEvent event) {
+        // GPS provider - listen for GPS events
+        final TextView textViewGps = (TextView) findViewById(R.id.textView1);
+        final Location location = event.getLocation();
+
+        // show firstly for GPS
+        String gps_location = "GPS LOCATION: " + Double.toString(location.getLongitude()) + " " + Double.toString(location.getLatitude());
+        textViewGps.setText(gps_location);
+        Log.d("LOCATION_CHANGED", gps_location);
+        Toast.makeText(getApplicationContext(), (CharSequence) event.getLocation(),Toast.LENGTH_LONG).show();
     }
 }
